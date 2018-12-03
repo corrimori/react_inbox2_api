@@ -203,29 +203,74 @@ class App extends Component {
   };
 
   // label in parameter is target.value
-  addLabel = label => {
+  addLabel = async label => {
     console.log('in add label...');
-    const messages = this.state.messages.map(message => {
-      if (!message.labels.includes(label) && message.selected) {
-        message.labels.push(label);
-      }
-      return message;
+    let { messages } = this.state;
+
+    let selectedMessages = this.state.messages.filter(
+      message => message.selected
+    );
+    // array of ids of selected messages
+    let selectedMessagesId = selectedMessages.map(message => message.id);
+
+    let payload = {
+      messageIds: selectedMessagesId,
+      command: 'addLabel',
+      label,
+    };
+
+    const response = await fetch(`${BaseURL}/api/messages`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify(payload),
     });
+
+    // const message = await response.json();
+    messages = await response.json();
     this.setState({ messages });
   };
 
-  removeLabel = label => {
+  removeLabel = async label => {
     console.log('in remove label...');
-    // let { messages } = this.state;
+    let { messages } = this.state;
 
-    const messages = this.state.messages.map(message => {
-      if (message.labels.includes(label) && message.selected) {
-        // filters thru all labels without label to delete
-        message.labels = message.labels.filter(el => el !== label);
-      }
-      return message;
+    let selectedMessages = this.state.messages.filter(
+      message => message.selected
+    );
+    // array of ids of selected messages
+    let selectedMessagesId = selectedMessages.map(message => message.id);
+
+    let payload = {
+      messageIds: selectedMessagesId,
+      command: 'removeLabel',
+      label,
+    };
+
+    const response = await fetch(`${BaseURL}/api/messages`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify(payload),
     });
+
+    // const message = await response.json();
+    messages = await response.json();
     this.setState({ messages });
+    //
+    //
+    // const messages = this.state.messages.map(message => {
+    //   if (message.labels.includes(label) && message.selected) {
+    //     // filters thru all labels without label to delete
+    //     message.labels = message.labels.filter(el => el !== label);
+    //   }
+    //   return message;
+    // });
+    // this.setState({ messages });
   };
 
   noSelectionDisable = () => {
