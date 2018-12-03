@@ -330,10 +330,14 @@ class App extends Component {
           noSelectionDisable={this.noSelectionDisable}
           toggleCompose={this.toggleCompose}
         />
-        <ComposeMessage
-          createNewMsg={this.createNewMsg}
-          showCompose={this.state.showCompose}
-        />
+        {this.state.showCompose ? (
+          <ComposeMessage
+            createNewMsg={this.createNewMsg}
+            toggleCompose={this.toggleCompose}
+          />
+        ) : (
+          false
+        )}
         <Messages
           messages={this.state.messages}
           toggleStarred={this.toggleStarred}

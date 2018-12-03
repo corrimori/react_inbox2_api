@@ -14,17 +14,12 @@ class ComposeMessage extends Component {
   handleSubmit = e => {
     e.preventDefault();
     this.props.createNewMsg(this.state);
-    // this.props.toggleCompose();
+    this.props.toggleCompose();
   };
 
   render() {
     return (
-      <form
-        className={`form-horizontal well ${
-          this.props.showCompose ? '' : 'hidden'
-        }`}
-        onSubmit={this.handleSubmit}
-      >
+      <form className="form-horizontal well" onSubmit={this.handleSubmit}>
         <div className="form-group">
           <div className="col-sm-8 col-sm-offset-2">
             <h4>Compose Message</h4>
