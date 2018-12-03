@@ -13,16 +13,15 @@ class App extends Component {
 
   async componentDidMount() {
     console.log('in componentDidMount...');
-    const messagesResponse = await fetch(`${BaseURL}/api/messages`);
-    const messagesJSON = await messagesResponse.json();
-    this.setState({ messages: messagesJSON });
+    this.getMessages();
   }
 
   // async updateMessages = payload => {
   //   await this.request('')
   // }
 
-  // take this.state.messages (mapping thru) and return array of ids and pass as parameter to method
+  // take this.state.messages (mapping thru) and
+  // return array of ids and pass as parameter to method
   toggleStarred = async message => {
     console.log('in toggle Starred...');
     let payload = {
@@ -45,28 +44,54 @@ class App extends Component {
 
     // const message = await response.json();
     this.setState({ messages });
-
-    // concat is making a copy of array and merging so not updating state directly
-    // this.setState(this.state.messages.concat(message));
   };
 
   toggleSelected = message => {
     console.log('in toggle selected...');
     message.selected = !message.selected;
     this.setState(this.state.messages.concat(message));
+
+    // concat is making a copy of array and merging so not updating state directly
   };
 
-  markedRead = () => {
+  // ================================================
+  markedRead = async () => {
     console.log('in markedRead...');
+    let { messages } = this.state;
+
     let selectedMessages = this.state.messages.filter(
       message => message.selected
     );
-    selectedMessages = selectedMessages.map(el => {
-      el.read = true;
-      return el;
+    // array of ids of selected messages
+    let selectedMessagesId = selectedMessages.map(message => message.id);
+
+    let payload = {
+      messageIds: selectedMessagesId,
+      command: 'read',
+      read: true,
+    };
+
+    const response = await fetch(`${BaseURL}/api/messages`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify(payload),
     });
-    this.setState(this.state.messages.concat(selectedMessages));
+
+    messages = await response.json();
+    this.setState({ messages });
+
+    // then(response => {
+    //   console.log('response>>$$$$$$$$$$$$$', response.json());
+    //   // let messagesJSON = response.json();
+    //   // this.setState({ messages: messagesJSON });
+    //   this.setState({ messages });
+    // });
   };
+
+  // this.setState(this.state.messages.concat(results.json()));
 
   markedUnread = () => {
     console.log('in marked Unread...');
@@ -141,6 +166,7 @@ class App extends Component {
     this.unreadMessages();
   };
 
+  // counts to unread messages
   unreadMessages = () => {
     let unreadMessagesCnt = this.state.messages.filter(message => !message.read)
       .length;
@@ -190,7 +216,7 @@ class App extends Component {
 
   createNewMsg = async msgData => {
     console.log('in send message...');
-    console.log('composedMsgData', msgData);
+    console.log('composedMsgData***********', msgData);
     fetch(`${BaseURL}/api/messages`, {
       method: 'POST',
       headers: {
@@ -202,31 +228,16 @@ class App extends Component {
         body: msgData.body,
       }),
     }).then(() => {
-      // Refresh the message list with GET request
-      const getMessages = async () => {
-        const response = await fetch(`${BaseURL}/api/messages`);
-        const messagesJSON = await response.json();
-        console.log('messagejson'.messagesJSON);
-        this.setState({ messages: messagesJSON });
-      };
-      getMessages();
+      this.getMessages();
     });
   };
 
-  // const response = await fetch(`${BaseURL}/api/messages`, {
-  //   method: 'POST',
-  //   headers: {
-  //     'Content-Type': 'application/json',
-  //     Accept: 'application/json',
-  //   },
-  //   body: JSON.stringify({
-  //     subject: msgData.subject,
-  //     body: msgData.body,
-  //   }),
-  // });
-  // const messagesJSON = await response.json();
-  // this.setState({ messages: messagesJSON });
-  // };
+  // Refresh the message list with GET request, set State
+  getMessages = async () => {
+    const response = await fetch(`${BaseURL}/api/messages`);
+    const messagesJSON = await response.json();
+    this.setState({ messages: messagesJSON });
+  };
 
   render() {
     return (
