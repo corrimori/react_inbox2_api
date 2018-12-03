@@ -16,10 +16,6 @@ class App extends Component {
     this.getMessages();
   }
 
-  // async updateMessages = payload => {
-  //   await this.request('')
-  // }
-
   // take this.state.messages (mapping thru) and
   // return array of ids and pass as parameter to method
   toggleStarred = async message => {
@@ -50,11 +46,9 @@ class App extends Component {
     console.log('in toggle selected...');
     message.selected = !message.selected;
     this.setState(this.state.messages.concat(message));
-
     // concat is making a copy of array and merging so not updating state directly
   };
 
-  // ================================================
   markedRead = async () => {
     console.log('in markedRead...');
     let { messages } = this.state;
@@ -62,7 +56,7 @@ class App extends Component {
     let selectedMessages = this.state.messages.filter(
       message => message.selected
     );
-    // array of ids of selected messages
+    // create array of ids of selected messages
     let selectedMessagesId = selectedMessages.map(message => message.id);
 
     let payload = {
@@ -80,29 +74,39 @@ class App extends Component {
       body: JSON.stringify(payload),
     });
 
+    // const message = await response.json();
     messages = await response.json();
     this.setState({ messages });
-
-    // then(response => {
-    //   console.log('response>>$$$$$$$$$$$$$', response.json());
-    //   // let messagesJSON = response.json();
-    //   // this.setState({ messages: messagesJSON });
-    //   this.setState({ messages });
-    // });
   };
 
-  // this.setState(this.state.messages.concat(results.json()));
-
-  markedUnread = () => {
+  markedUnread = async () => {
     console.log('in marked Unread...');
+    let { messages } = this.state;
+
     let selectedMessages = this.state.messages.filter(
       message => message.selected
     );
-    selectedMessages = selectedMessages.map(el => {
-      el.read = false;
-      return el;
+    // create array of ids of selected messages
+    let selectedMessagesId = selectedMessages.map(message => message.id);
+
+    let payload = {
+      messageIds: selectedMessagesId,
+      command: 'read',
+      read: false,
+    };
+
+    const response = await fetch(`${BaseURL}/api/messages`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify(payload),
     });
-    this.setState(this.state.messages.concat(selectedMessages));
+
+    // const message = await response.json();
+    messages = await response.json();
+    this.setState({ messages });
   };
 
   selectAll = () => {
@@ -159,9 +163,33 @@ class App extends Component {
     }
   };
 
-  deleteMessage = () => {
+  deleteMessage = async () => {
     console.log('in delete Message...');
-    let messages = this.state.messages.filter(message => !message.selected);
+    let { messages } = this.state;
+
+    let selectedMessages = this.state.messages.filter(
+      message => message.selected
+    );
+
+    // array of ids of selected messages
+    let selectedMessagesId = selectedMessages.map(message => message.id);
+
+    let payload = {
+      messageIds: selectedMessagesId,
+      command: 'delete',
+    };
+
+    const response = await fetch(`${BaseURL}/api/messages`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    // const message = await response.json();
+    messages = await response.json();
     this.setState({ messages });
     this.unreadMessages();
   };
@@ -188,6 +216,8 @@ class App extends Component {
 
   removeLabel = label => {
     console.log('in remove label...');
+    // let { messages } = this.state;
+
     const messages = this.state.messages.map(message => {
       if (message.labels.includes(label) && message.selected) {
         // filters thru all labels without label to delete
