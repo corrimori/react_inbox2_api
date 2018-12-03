@@ -8,6 +8,7 @@ let BaseURL = 'http://localhost:8082';
 class App extends Component {
   state = {
     messages: [],
+    showCompose: false,
   };
 
   async componentDidMount() {
@@ -21,24 +22,28 @@ class App extends Component {
   //   await this.request('')
   // }
 
-  // async
-  toggleStarred = message => {
+  // take this.state.messages (mapping thru) and return array of ids and pass as parameter to method
+  toggleStarred = async message => {
     console.log('in toggle Starred...');
+    let payload = {
+      messageIds: [message.id],
+      command: 'star',
+      star: !message.starred,
+    };
+
+    const response = await fetch(`${BaseURL}/api/messages`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
     message.starred = !message.starred;
     const messages = [...this.state.messages];
 
-    // fetch(`${BaseURL}/api/messages`, {
-    //   method: 'PATCH',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //     Accept: 'application/json',
-    //   },
-    //   body: JSON.stringify({
-    //     starred: 'false',
-    //   }),
-    // })
-
-    // const message = await response.json()
+    // const message = await response.json();
     this.setState({ messages });
 
     // concat is making a copy of array and merging so not updating state directly
@@ -183,11 +188,45 @@ class App extends Component {
     this.setState({ showCompose: !this.state.showCompose });
   };
 
-  sendMessage = data => {
+  createNewMsg = async msgData => {
     console.log('in send message...');
-    console.log('composedMsgData', data);
-    // const subject = document.querySelector('#subject').value
+    console.log('composedMsgData', msgData);
+    fetch(`${BaseURL}/api/messages`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify({
+        subject: msgData.subject,
+        body: msgData.body,
+      }),
+    }).then(() => {
+      // Refresh the message list with GET request
+      const getMessages = async () => {
+        const response = await fetch(`${BaseURL}/api/messages`);
+        const messagesJSON = await response.json();
+        console.log('messagejson'.messagesJSON);
+        this.setState({ messages: messagesJSON });
+      };
+      getMessages();
+    });
   };
+
+  // const response = await fetch(`${BaseURL}/api/messages`, {
+  //   method: 'POST',
+  //   headers: {
+  //     'Content-Type': 'application/json',
+  //     Accept: 'application/json',
+  //   },
+  //   body: JSON.stringify({
+  //     subject: msgData.subject,
+  //     body: msgData.body,
+  //   }),
+  // });
+  // const messagesJSON = await response.json();
+  // this.setState({ messages: messagesJSON });
+  // };
 
   render() {
     return (
@@ -206,9 +245,8 @@ class App extends Component {
           toggleCompose={this.toggleCompose}
         />
         <ComposeMessage
+          createNewMsg={this.createNewMsg}
           showCompose={this.state.showCompose}
-          composedMsgData={{ subject: '', body: '' }}
-          sendMessage={this.sendMessage}
         />
         <Messages
           messages={this.state.messages}

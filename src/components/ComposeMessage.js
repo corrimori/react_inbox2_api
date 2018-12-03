@@ -1,13 +1,29 @@
 import React, { Component } from 'react';
 
 class ComposeMessage extends Component {
+  state = {
+    subject: '',
+    body: '',
+  };
+
+  handleChange = e => {
+    this.setState({ [e.target.name]: e.target.value });
+  };
+
+  // on submit button clicked, pass state/args to createNewMsg
+  handleSubmit = e => {
+    e.preventDefault();
+    this.props.createNewMsg(this.state);
+    // this.props.toggleCompose();
+  };
+
   render() {
     return (
       <form
         className={`form-horizontal well ${
           this.props.showCompose ? '' : 'hidden'
         }`}
-        onSubmit={this.submitHandler}
+        onSubmit={this.handleSubmit}
       >
         <div className="form-group">
           <div className="col-sm-8 col-sm-offset-2">
@@ -21,10 +37,9 @@ class ComposeMessage extends Component {
           </label>
           <div className="col-sm-8">
             <input
+              onChange={this.handleChange}
               type="text"
               className="form-control"
-              id="subject"
-              value={this.props.composedMsgData.subject}
               placeholder="Enter a subject"
               name="subject"
             />
@@ -37,22 +52,16 @@ class ComposeMessage extends Component {
           </label>
           <div className="col-sm-8">
             <textarea
+              onChange={this.handleChange}
               name="body"
-              id="body"
               className="form-control"
-              value={this.props.composedMsgData.body}
             />
           </div>
         </div>
 
         <div className="form-group">
           <div className="col-sm-8 col-sm-offset-2">
-            <input
-              onClick={this.props.sendMessage(this.props.composedMsgData)}
-              type="submit"
-              value="Send"
-              className="btn btn-primary"
-            />
+            <input type="submit" className="btn btn-primary" />
           </div>
         </div>
       </form>
