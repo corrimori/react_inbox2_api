@@ -1,88 +1,46 @@
 import React, { Component } from 'react';
 import Toolbar from './components/Toolbar';
 import Messages from './components/Messages';
+import ComposeMessage from './components/ComposeMessage';
 
-let messages = [
-  {
-    id: 1,
-    subject:
-      "You can't input the protocol without calculating the mobile RSS protocol!",
-    read: false,
-    starred: true,
-    labels: ['dev', 'personal'],
-  },
-  {
-    id: 2,
-    subject:
-      "connecting the system won't do anything, we need to input the mobile AI panel!",
-    read: false,
-    starred: false,
-    selected: true,
-    labels: [],
-  },
-  {
-    id: 3,
-    subject:
-      'Use the 1080p HTTP feed, then you can parse the cross-platform hard drive!',
-    read: false,
-    starred: true,
-    labels: ['dev'],
-  },
-  {
-    id: 4,
-    subject: 'We need to program the primary TCP hard drive!',
-    read: true,
-    starred: false,
-    selected: true,
-    labels: [],
-  },
-  {
-    id: 5,
-    subject:
-      'If we override the interface, we can get to the HTTP feed through the virtual EXE interface!',
-    read: false,
-    starred: false,
-    labels: ['personal'],
-  },
-  {
-    id: 6,
-    subject: 'We need to back up the wireless GB driver!',
-    read: true,
-    starred: true,
-    labels: [],
-  },
-  {
-    id: 7,
-    subject: 'We need to index the mobile PCI bus!',
-    read: true,
-    starred: false,
-    labels: ['dev', 'personal'],
-  },
-  {
-    id: 8,
-    subject:
-      'If we connect the sensor, we can get to the HDD port through the redundant IB firewall!',
-    read: true,
-    starred: true,
-    labels: [],
-  },
-];
+let BaseURL = 'http://localhost:8082';
 
 class App extends Component {
   state = {
     messages: [],
   };
 
-  componentDidMount() {
-    this.setState({ messages });
+  async componentDidMount() {
+    console.log('in componentDidMount...');
+    const messagesResponse = await fetch(`${BaseURL}/api/messages`);
+    const messagesJSON = await messagesResponse.json();
+    this.setState({ messages: messagesJSON });
   }
 
+  // async updateMessages = payload => {
+  //   await this.request('')
+  // }
+
+  // async
   toggleStarred = message => {
     console.log('in toggle Starred...');
-    console.log('message===>>', message);
     message.starred = !message.starred;
     const messages = [...this.state.messages];
+
+    // fetch(`${BaseURL}/api/messages`, {
+    //   method: 'PATCH',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //     Accept: 'application/json',
+    //   },
+    //   body: JSON.stringify({
+    //     starred: 'false',
+    //   }),
+    // })
+
+    // const message = await response.json()
     this.setState({ messages });
+
     // concat is making a copy of array and merging so not updating state directly
     // this.setState(this.state.messages.concat(message));
   };
@@ -188,7 +146,7 @@ class App extends Component {
   // label in parameter is target.value
   addLabel = label => {
     console.log('in add label...');
-    messages.map(message => {
+    const messages = this.state.messages.map(message => {
       if (!message.labels.includes(label) && message.selected) {
         message.labels.push(label);
       }
@@ -199,7 +157,7 @@ class App extends Component {
 
   removeLabel = label => {
     console.log('in remove label...');
-    messages.map(message => {
+    const messages = this.state.messages.map(message => {
       if (message.labels.includes(label) && message.selected) {
         // filters thru all labels without label to delete
         message.labels = message.labels.filter(el => el !== label);
@@ -220,6 +178,17 @@ class App extends Component {
   };
   // .length === 0 : disable = 'disabled': disable = ''
 
+  toggleCompose = () => {
+    console.log('in toggleCompose...');
+    this.setState({ showCompose: !this.state.showCompose });
+  };
+
+  sendMessage = data => {
+    console.log('in send message...');
+    console.log('composedMsgData', data);
+    // const subject = document.querySelector('#subject').value
+  };
+
   render() {
     return (
       <div className="App">
@@ -234,6 +203,12 @@ class App extends Component {
           addLabel={this.addLabel}
           removeLabel={this.removeLabel}
           noSelectionDisable={this.noSelectionDisable}
+          toggleCompose={this.toggleCompose}
+        />
+        <ComposeMessage
+          showCompose={this.state.showCompose}
+          composedMsgData={{ subject: '', body: '' }}
+          sendMessage={this.sendMessage}
         />
         <Messages
           messages={this.state.messages}

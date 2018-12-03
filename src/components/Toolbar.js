@@ -12,8 +12,9 @@ class Toolbar extends Component {
       addLabel,
       removeLabel,
       noSelectionDisable,
+      toggleCompose,
     } = this.props;
-    console.log('unread========', unreadMessages);
+    console.log('inToolbar=============');
     return (
       <div className="row toolbar">
         <div className="col-md-12">
@@ -23,7 +24,7 @@ class Toolbar extends Component {
           </p>
 
           <a className="btn btn-danger">
-            <i className="fa fa-plus" />
+            <i onClick={toggleCompose} className="fa fa-plus" />
           </a>
 
           <button className="btn btn-default">
